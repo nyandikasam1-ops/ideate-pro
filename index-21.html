@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Ideate Pro — AI Idea Enhancer</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Mono:wght@300;400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #0d0d0f;
+    --paper: #f8f5ef;
+    --gold: #b8943f;
+    --gold-light: #e8c96a;
+    --smoke: #f0ece3;
+    --mist: #e2ddd4;
+    --slate: #6b6660;
+    --accent: #2c4a3e;
+    --accent-light: #4a7a6a;
+    --danger: #8b3a3a;
+    --radius: 4px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Outfit', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .shell {
+    position: relative;
+    z-index: 1;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 48px 0 32px;
+    border-bottom: 1px solid var(--mist);
+    margin-bottom: 48px;
+    animation: fadeDown 0.6s ease both;
+  }
+
+  .logo-block .wordmark {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    line-height: 1;
+  }
+
+  .logo-block .tagline {
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-top: 4px;
+    font-weight: 400;
+  }
+
+  .status-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--slate);
+  }
+
+  .status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent-light);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  .section-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--slate);
+    margin-bottom: 10px;
+    font-weight: 400;
+  }
+
+  .tone-bar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+
+  .tone-btn {
+    padding: 7px 18px;
+    border: 1px solid var(--mist);
+    border-radius: 2px;
+    background: transparent;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: var(--slate);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.04em;
+  }
+
+  .tone-btn:hover {
+    border-color: var(--gold);
+    color: var(--ink);
+  }
+
+  .tone-btn.active {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+
+  .input-wrapper {
+    position: relative;
+    margin-bottom: 16px;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+
+  .main-input {
+    width: 100%;
+    min-height: 160px;
+    padding: 20px 24px;
+    background: white;
+    border: 1px solid var(--mist);
+    border-radius: var(--radius);
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 300;
+    color: var(--ink);
+    line-height: 1.7;
+    resize: vertical;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+
+  .main-input::placeholder { color: #b5b0a8; }
+  .main-input:focus { border-color: var(--gold); }
+
+  .char-count {
+    position: absolute;
+    bottom: 12px;
+    right: 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--mist);
+  }
+
+  .feature-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+    animation: fadeUp 0.6s 0.25s ease both;
+  }
+
+  .feature-toggle {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 14px;
+    border: 1px solid var(--mist);
+    border-radius: 2px;
+    background: transparent;
+    cursor: pointer;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.78rem;
+    color: var(--slate);
+    transition: all 0.2s;
+    user-select: none;
+  }
+
+  .feature-toggle input { display: none; }
+
+  .feature-toggle.checked {
+    background: var(--smoke);
+    border-color: var(--gold);
+    color: var(--ink);
+  }
+
+  .feature-toggle .icon { font-size: 0.9rem; }
+
+  .action-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 40px;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+
+  .btn-primary {
+    flex: 1;
+    padding: 14px 28px;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    border-radius: var(--radius);
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background: var(--accent);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(13,13,15,0.15);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .btn-secondary {
+    padding: 14px 20px;
+    background: transparent;
+    color: var(--slate);
+    border: 1px solid var(--mist);
+    border-radius: var(--radius);
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-secondary:hover { border-color: var(--gold); color: var(--ink); }
+
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid rgba(248,245,239,0.3);
+    border-top-color: var(--paper);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: none;
+  }
+
+  .output-section {
+    display: none;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .output-section.visible { display: block; }
+
+  .output-card {
+    background: white;
+    border: 1px solid var(--mist);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+
+  .output-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    background: var(--smoke);
+    border-bottom: 1px solid var(--mist);
+  }
+
+  .output-card-header .label {
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--slate);
+    font-weight: 400;
+  }
+
+  .output-card-header .badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    padding: 3px 8px;
+    background: var(--gold);
+    color: white;
+    border-radius: 2px;
+    letter-spacing: 0.08em;
+  }
+
+  .output-body {
+    padding: 28px 28px;
+    font-size: 0.95rem;
+    line-height: 1.85;
+    color: var(--ink);
+    font-weight: 300;
+    white-space: pre-wrap;
+    min-height: 80px;
+  }
+
+  .output-body.streaming::after {
+    content: '▋';
+    animation: blink 0.8s step-end infinite;
+    color: var(--gold);
+    font-size: 0.9em;
+  }
+
+  .output-actions {
+    display: flex;
+    gap: 8px;
+    padding: 12px 20px;
+    border-top: 1px solid var(--mist);
+    background: var(--smoke);
+  }
+
+  .mini-btn {
+    padding: 6px 14px;
+    border: 1px solid var(--mist);
+    background: white;
+    border-radius: 2px;
+    font-size: 0.75rem;
+    font-family: 'Outfit', sans-serif;
+    color: var(--slate);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .mini-btn:hover { border-color: var(--gold); color: var(--ink); }
+  .mini-btn.success { border-color: var(--accent); color: var(--accent); }
+
+  .versions-bar {
+    display: none;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+
+  .versions-bar.visible { display: flex; }
+
+  .version-chip {
+    padding: 4px 12px;
+    border: 1px solid var(--mist);
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-family: 'DM Mono', monospace;
+    color: var(--slate);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .version-chip.active {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+
+  .diff-section {
+    display: none;
+    background: white;
+    border: 1px solid var(--mist);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+
+  .diff-section.visible { display: block; }
+  .diff-header {
+    padding: 12px 20px;
+    background: var(--smoke);
+    border-bottom: 1px solid var(--mist);
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--slate);
+  }
+
+  .diff-body { padding: 20px 24px; font-size: 0.85rem; line-height: 1.8; }
+  .diff-body del { background: #fde8e8; color: var(--danger); text-decoration: none; padding: 1px 2px; border-radius: 2px; }
+  .diff-body ins { background: #e8f5e9; color: var(--accent); text-decoration: none; padding: 1px 2px; border-radius: 2px; }
+
+  .stats-row {
+    display: none;
+    gap: 24px;
+    padding: 20px 0;
+    border-top: 1px solid var(--mist);
+    margin-top: 8px;
+  }
+
+  .stats-row.visible { display: flex; }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .stat-val {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--slate);
+  }
+
+  .error-banner {
+    display: none;
+    padding: 14px 20px;
+    background: #fdf2f2;
+    border: 1px solid #f5c6c6;
+    border-radius: var(--radius);
+    color: var(--danger);
+    font-size: 0.85rem;
+    margin-bottom: 16px;
+  }
+
+  .error-banner.visible { display: block; }
+
+  footer {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--mist);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    color: var(--mist);
+  }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; }
+    50%      { opacity: 0.3; }
+  }
+  @keyframes blink {
+    0%,100% { opacity: 1; }
+    50%      { opacity: 0; }
+  }
+
+  @media (max-width: 600px) {
+    header { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .action-row { flex-direction: column; }
+    .btn-primary { width: 100%; }
+  }
+
+  /* ── Dashboard ── */
+  .dashboard {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    padding: 18px 22px;
+    background: white;
+    border: 1px solid var(--mist);
+    border-radius: var(--radius);
+    margin-bottom: 32px;
+    animation: fadeUp 0.6s 0.08s ease both;
+  }
+
+  .dash-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .dash-val {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.7rem;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1;
+  }
+
+  .dash-label {
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--slate);
+  }
+
+  .dash-badges {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    flex: 1;
+  }
+
+  .dash-badge {
+    font-size: 1.1rem;
+    padding: 4px 8px;
+    background: var(--smoke);
+    border: 1px solid var(--mist);
+    border-radius: 20px;
+    cursor: default;
+  }
+
+  .dash-history-btn {
+    margin-left: auto;
+    padding: 8px 16px;
+    border: 1px solid var(--mist);
+    background: transparent;
+    border-radius: 2px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.78rem;
+    color: var(--slate);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .dash-history-btn:hover { border-color: var(--gold); color: var(--ink); }
+  .dash-history-btn.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+  /* ── History Panel ── */
+  .history-panel {
+    display: none;
+    background: white;
+    border: 1px solid var(--mist);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 32px;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .history-panel.visible { display: block; }
+
+  .history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 20px;
+    background: var(--smoke);
+    border-bottom: 1px solid var(--mist);
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--slate);
+  }
+
+  .history-list {
+    max-height: 360px;
+    overflow-y: auto;
+  }
+
+  .history-empty {
+    padding: 28px;
+    text-align: center;
+    color: #b5b0a8;
+    font-size: 0.85rem;
+  }
+
+  .history-item {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--mist);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .history-item:last-child { border-bottom: none; }
+
+  .history-item-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.68rem;
+    color: var(--slate);
+    letter-spacing: 0.04em;
+  }
+
+  .history-item-tone {
+    font-family: 'DM Mono', monospace;
+    background: var(--smoke);
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+
+  .history-item-text {
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: var(--ink);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .history-item-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 2px;
+  }
+
+  .history-item-actions button {
+    padding: 4px 10px;
+    border: 1px solid var(--mist);
+    background: transparent;
+    border-radius: 2px;
+    font-size: 0.7rem;
+    font-family: 'Outfit', sans-serif;
+    color: var(--slate);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .history-item-actions button:hover { border-color: var(--gold); color: var(--ink); }
+
+  .save-btn.saved {
+    border-color: var(--accent) !important;
+    color: var(--accent) !important;
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <header>
+    <div class="logo-block">
+      <div class="wordmark">Ideate Pro</div>
+      <div class="tagline">AI-Powered Idea Enhancer</div>
+    </div>
+    <div class="status-pill">
+      <span class="status-dot"></span>
+      System Online
+    </div>
+  </header>
+
+  <!-- Dashboard -->
+  <div class="dashboard" id="dashboard">
+    <div class="dash-stat">
+      <span class="dash-val" id="dashTotal">0</span>
+      <span class="dash-label">Ideas Enhanced</span>
+    </div>
+    <div class="dash-stat">
+      <span class="dash-val" id="dashStreak">0</span>
+      <span class="dash-label">Day Streak 🔥</span>
+    </div>
+    <div class="dash-stat">
+      <span class="dash-val" id="dashBest">0</span>
+      <span class="dash-label">Best Streak</span>
+    </div>
+    <div class="dash-badges" id="dashBadges"></div>
+    <button class="dash-history-btn" id="historyToggleBtn" onclick="toggleHistory()">📜 History</button>
+  </div>
+
+  <!-- History Panel -->
+  <div class="history-panel" id="historyPanel">
+    <div class="history-header">
+      <span>Saved Ideas</span>
+      <button class="mini-btn" onclick="clearHistory()">🗑 Clear All</button>
+    </div>
+    <div class="history-list" id="historyList">
+      <div class="history-empty">No saved ideas yet — enhance something and tap "Save" on the result.</div>
+    </div>
+  </div>
+
+  <div style="animation: fadeUp 0.6s 0.05s ease both;">
+    <div class="section-label">Select Tone</div>
+    <div class="tone-bar" id="toneBar">
+      <button class="tone-btn active" data-tone="professional">Professional</button>
+      <button class="tone-btn" data-tone="executive">Executive</button>
+      <button class="tone-btn" data-tone="creative">Creative</button>
+      <button class="tone-btn" data-tone="persuasive">Persuasive</button>
+      <button class="tone-btn" data-tone="concise">Ultra-Concise</button>
+      <button class="tone-btn" data-tone="academic">Academic</button>
+    </div>
+  </div>
+
+  <div class="input-wrapper">
+    <div class="section-label">Your Rough Idea</div>
+    <textarea class="main-input" id="inputText"
+      placeholder="Type your rough idea, draft, or bullet points here… e.g. 'want to improve team meetings, they go too long and people don't engage'"
+      maxlength="2000"
+      oninput="updateCharCount(this)"></textarea>
+    <span class="char-count" id="charCount">0 / 2000</span>
+  </div>
+
+  <div class="section-label">Enhancements</div>
+  <div class="feature-row">
+    <label class="feature-toggle checked" id="toggle-clarity">
+      <input type="checkbox" checked data-feature="clarity">
+      <span class="icon">🎯</span> Clarity Boost
+    </label>
+    <label class="feature-toggle checked" id="toggle-examples">
+      <input type="checkbox" checked data-feature="examples">
+      <span class="icon">💡</span> Add Examples
+    </label>
+    <label class="feature-toggle" id="toggle-bullets">
+      <input type="checkbox" data-feature="bullets">
+      <span class="icon">📋</span> Bullet Points
+    </label>
+    <label class="feature-toggle" id="toggle-cta">
+      <input type="checkbox" data-feature="cta">
+      <span class="icon">🚀</span> Add Call-to-Action
+    </label>
+    <label class="feature-toggle" id="toggle-shorter">
+      <input type="checkbox" data-feature="shorter">
+      <span class="icon">✂️</span> Trim Fluff
+    </label>
+  </div>
+
+  <div class="action-row">
+    <button class="btn-primary" id="enhanceBtn" onclick="enhanceIdea()">
+      <span id="btnLabel">✦ Enhance My Idea</span>
+      <div class="spinner" id="spinner"></div>
+    </button>
+    <button class="btn-secondary" onclick="clearAll()">Clear</button>
+  </div>
+
+  <div class="error-banner" id="errorBanner"></div>
+
+  <div class="output-section" id="outputSection">
+
+    <div class="stats-row" id="statsRow">
+      <div class="stat">
+        <span class="stat-val" id="statWordsBefore">—</span>
+        <span class="stat-label">Words Before</span>
+      </div>
+      <div class="stat">
+        <span class="stat-val" id="statWordsAfter">—</span>
+        <span class="stat-label">Words After</span>
+      </div>
+      <div class="stat">
+        <span class="stat-val" id="statReadability">—</span>
+        <span class="stat-label">Reading Time</span>
+      </div>
+      <div class="stat">
+        <span class="stat-val" id="statVersion">v1</span>
+        <span class="stat-label">Version</span>
+      </div>
+    </div>
+
+    <div class="versions-bar" id="versionsBar"></div>
+
+    <div class="output-card">
+      <div class="output-card-header">
+        <span class="label">Enhanced Version</span>
+        <span class="badge" id="toneBadge">Professional</span>
+      </div>
+      <div class="output-body" id="outputBody"></div>
+      <div class="output-actions">
+        <button class="mini-btn" onclick="copyOutput()" id="copyBtn">📋 Copy</button>
+        <button class="mini-btn save-btn" onclick="saveCurrentIdea()" id="saveBtn">⭐ Save</button>
+        <button class="mini-btn" onclick="refineAgain()">🔄 Refine Again</button>
+        <button class="mini-btn" onclick="toggleDiff()">🔍 Show Changes</button>
+        <button class="mini-btn" onclick="downloadTxt()">⬇ Download</button>
+      </div>
+    </div>
+
+    <div class="diff-section" id="diffSection">
+      <div class="diff-header">What Changed</div>
+      <div class="diff-body" id="diffBody"></div>
+    </div>
+
+  </div>
+
+  <footer>
+    <span>Ideate Pro · © @samtech2026</span>
+    <span id="footerTime"></span>
+  </footer>
+
+</div>
+
+<script>
+  // ── State ──
+  let versions = [];
+  let currentVersion = 0;
+  let diffVisible = false;
+  let selectedTone = 'professional';
+  let historyVisible = false;
+
+  // ── Dashboard / Streak / Badges / History (all in localStorage) ──
+  const STORAGE_KEY = 'ideateProStats';
+  const HISTORY_KEY = 'ideateProHistory';
+
+  const BADGE_DEFS = [
+    { id: 'first',   emoji: '🌱', threshold: 1,  label: 'First Idea' },
+    { id: 'ten',      emoji: '🚀', threshold: 10, label: '10 Ideas' },
+    { id: 'fifty',    emoji: '💎', threshold: 50, label: '50 Ideas' },
+    { id: 'streak3',  emoji: '🔥', threshold: 3,  label: '3-Day Streak', type: 'streak' },
+    { id: 'streak7',  emoji: '⚡', threshold: 7,  label: '7-Day Streak', type: 'streak' },
+  ];
+
+  function loadStats() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return { total: 0, streak: 0, bestStreak: 0, lastDate: null, badges: [] };
+      return JSON.parse(raw);
+    } catch (e) {
+      return { total: 0, streak: 0, bestStreak: 0, lastDate: null, badges: [] };
+    }
+  }
+
+  function saveStats(stats) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(stats)); } catch (e) {}
+  }
+
+  function dayKey(d) {
+    return d.toISOString().slice(0, 10); // YYYY-MM-DD
+  }
+
+  function recordEnhancement() {
+    const stats = loadStats();
+    const today = dayKey(new Date());
+
+    stats.total += 1;
+
+    if (stats.lastDate !== today) {
+      const yesterday = dayKey(new Date(Date.now() - 86400000));
+      if (stats.lastDate === yesterday) {
+        stats.streak += 1;
+      } else {
+        stats.streak = 1;
+      }
+      stats.lastDate = today;
+    }
+
+    if (stats.streak > stats.bestStreak) stats.bestStreak = stats.streak;
+
+    BADGE_DEFS.forEach(b => {
+      const has = stats.badges.includes(b.id);
+      const earned = b.type === 'streak' ? stats.streak >= b.threshold : stats.total >= b.threshold;
+      if (earned && !has) stats.badges.push(b.id);
+    });
+
+    saveStats(stats);
+    renderDashboard(stats);
+  }
+
+  function renderDashboard(stats) {
+    stats = stats || loadStats();
+    document.getElementById('dashTotal').textContent = stats.total;
+    document.getElementById('dashStreak').textContent = stats.streak;
+    document.getElementById('dashBest').textContent = stats.bestStreak;
+
+    const badgesEl = document.getElementById('dashBadges');
+    badgesEl.innerHTML = stats.badges.map(id => {
+      const def = BADGE_DEFS.find(b => b.id === id);
+      if (!def) return '';
+      return `<span class="dash-badge" title="${def.label}">${def.emoji}</span>`;
+    }).join('');
+  }
+
+  // ── History ──
+  function loadHistory() {
+    try {
+      const raw = localStorage.getItem(HISTORY_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) { return []; }
+  }
+
+  function saveHistory(list) {
+    try { localStorage.setItem(HISTORY_KEY, JSON.stringify(list)); } catch (e) {}
+  }
+
+  function saveCurrentIdea() {
+    if (!versions.length) return;
+    const v = versions[currentVersion];
+    const list = loadHistory();
+    list.unshift({
+      tone: v.tone,
+      input: v.input,
+      output: v.output,
+      savedAt: new Date().toISOString()
+    });
+    saveHistory(list.slice(0, 50)); // cap at 50 saved ideas
+    renderHistory();
+
+    const btn = document.getElementById('saveBtn');
+    btn.textContent = '✓ Saved';
+    btn.classList.add('saved');
+    setTimeout(() => { btn.textContent = '⭐ Save'; btn.classList.remove('saved'); }, 1800);
+  }
+
+  function renderHistory() {
+    const list = loadHistory();
+    const el = document.getElementById('historyList');
+    if (!list.length) {
+      el.innerHTML = '<div class="history-empty">No saved ideas yet — enhance something and tap "Save" on the result.</div>';
+      return;
+    }
+    el.innerHTML = list.map((item, i) => {
+      const date = new Date(item.savedAt);
+      const dateStr = date.toLocaleDateString() + ' · ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+      const escaped = item.output.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return `
+        <div class="history-item">
+          <div class="history-item-meta">
+            <span class="history-item-tone">${item.tone}</span>
+            <span>${dateStr}</span>
+          </div>
+          <div class="history-item-text">${escaped}</div>
+          <div class="history-item-actions">
+            <button onclick="copyHistoryItem(${i})">📋 Copy</button>
+            <button onclick="loadHistoryIntoEditor(${i})">↩ Reuse</button>
+            <button onclick="deleteHistoryItem(${i})">🗑 Delete</button>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  async function copyHistoryItem(i) {
+    const list = loadHistory();
+    if (!list[i]) return;
+    await navigator.clipboard.writeText(list[i].output);
+  }
+
+  function loadHistoryIntoEditor(i) {
+    const list = loadHistory();
+    if (!list[i]) return;
+    document.getElementById('inputText').value = list[i].input;
+    updateCharCount(document.getElementById('inputText'));
+    document.querySelectorAll('.tone-btn').forEach(b => b.classList.toggle('active', b.dataset.tone === list[i].tone));
+    selectedTone = list[i].tone;
+    toggleHistory(false);
+    document.getElementById('inputText').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function deleteHistoryItem(i) {
+    const list = loadHistory();
+    list.splice(i, 1);
+    saveHistory(list);
+    renderHistory();
+  }
+
+  function clearHistory() {
+    saveHistory([]);
+    renderHistory();
+  }
+
+  function toggleHistory(force) {
+    historyVisible = typeof force === 'boolean' ? force : !historyVisible;
+    document.getElementById('historyPanel').classList.toggle('visible', historyVisible);
+    document.getElementById('historyToggleBtn').classList.toggle('active', historyVisible);
+    if (historyVisible) renderHistory();
+  }
+
+  // Initialize dashboard on load
+  renderDashboard();
+
+  // ── Tone Selection ──
+  document.getElementById('toneBar').addEventListener('click', e => {
+    const btn = e.target.closest('.tone-btn');
+    if (!btn) return;
+    document.querySelectorAll('.tone-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedTone = btn.dataset.tone;
+  });
+
+  // ── Feature Toggles ──
+  document.querySelectorAll('.feature-toggle').forEach(label => {
+    label.addEventListener('click', () => {
+      const cb = label.querySelector('input');
+      cb.checked = !cb.checked;
+      label.classList.toggle('checked', cb.checked);
+    });
+  });
+
+  // ── Char Count ──
+  function updateCharCount(el) {
+    document.getElementById('charCount').textContent = `${el.value.length} / 2000`;
+  }
+
+  // ── Get Active Features ──
+  function getFeatures() {
+    const active = [];
+    document.querySelectorAll('.feature-toggle input:checked').forEach(cb => {
+      active.push(cb.dataset.feature);
+    });
+    return active;
+  }
+
+  // ── Build System Prompt ──
+  function buildSystemPrompt(tone, features) {
+    const toneGuides = {
+      professional: 'polished, clear, business-appropriate language with confident structure',
+      executive:    'concise and strategic; C-suite language that focuses on impact and outcomes',
+      creative:     'vivid, memorable, with metaphor and energy that sparks imagination',
+      persuasive:   'compelling and emotionally resonant; anticipates objections and builds momentum',
+      concise:      'ruthlessly trimmed to the essential message; no filler words',
+      academic:     'precise, evidence-aware, with structured argumentation'
+    };
+
+    const featureInstructions = {
+      clarity:  '- Rewrite any vague or ambiguous phrases to be crystal clear.',
+      examples: '- Include 1–2 brief, concrete examples or analogies to illustrate the idea.',
+      bullets:  '- Format the key points as a clean bullet list.',
+      cta:      '- End with a compelling call-to-action or next step.',
+      shorter:  '- Cut all filler words, redundancy, and padding. Be as tight as possible.'
+    };
+
+    const featureLines = features.map(f => featureInstructions[f] || '').filter(Boolean).join('\n');
+
+    return `You are a world-class professional writing coach and strategist.
+Your task is to take a rough idea and transform it into a refined, high-impact version.
+
+Tone: ${toneGuides[tone] || toneGuides.professional}
+
+Apply these enhancements:
+${featureLines || '- Improve overall clarity and professionalism.'}
+
+Rules:
+- Preserve the core intent and meaning of the original idea.
+- Do not add lengthy preambles or meta-commentary.
+- Respond with ONLY the enhanced text — no "Here is your enhanced version:" headers.
+- Match the length to the content; don't pad unnecessarily.`;
+  }
+
+  // ── Main Enhance Function ──
+  async function enhanceIdea() {
+    const input = document.getElementById('inputText').value.trim();
+    if (!input) {
+      showError('Please enter your idea first.');
+      return;
+    }
+
+    const btn = document.getElementById('enhanceBtn');
+    const spinner = document.getElementById('spinner');
+    const label = document.getElementById('btnLabel');
+    const outputBody = document.getElementById('outputBody');
+    const errorBanner = document.getElementById('errorBanner');
+
+    errorBanner.classList.remove('visible');
+    btn.disabled = true;
+    spinner.style.display = 'block';
+    label.textContent = 'Enhancing…';
+    outputBody.textContent = '';
+    outputBody.classList.add('streaming');
+
+    const features = getFeatures();
+    const systemPrompt = buildSystemPrompt(selectedTone, features);
+
+    try {
+      // NOTE: this calls OUR OWN Netlify Function, not any AI provider directly.
+      // The function holds the real API key server-side and forwards the request.
+      const response = await fetch('/.netlify/functions/enhance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ systemPrompt, userInput: input })
+      });
+
+      // Read as text first so an empty/non-JSON response never crashes
+      // this with an unhandled "Unexpected end of JSON input" error —
+      // instead we surface a clear message.
+      const rawText = await response.text();
+      let data;
+      try {
+        data = rawText ? JSON.parse(rawText) : {};
+      } catch (parseErr) {
+        throw new Error('Server returned an unexpected response. Please try again.');
+      }
+
+      if (data.error) throw new Error(data.error);
+      if (!response.ok && !data.error) throw new Error('Request failed (status ' + response.status + ')');
+
+      const result = data.text || '';
+
+      await typeText(outputBody, result);
+
+      outputBody.classList.remove('streaming');
+
+      versions.push({ tone: selectedTone, input, output: result, features });
+      currentVersion = versions.length - 1;
+
+      recordEnhancement();
+      document.getElementById('saveBtn').textContent = '⭐ Save';
+      document.getElementById('saveBtn').classList.remove('saved');
+
+      updateUI(input, result);
+
+    } catch (err) {
+      outputBody.classList.remove('streaming');
+      // If this file is opened directly (file:// or as a local preview) there is
+      // no backend behind it at all — give a clear, specific message instead of
+      // a generic server error, since "could not reach server" is misleading here.
+      if (location.protocol === 'file:' || location.protocol === 'about:' || location.protocol === 'blob:') {
+        showError('This is a local preview of the file — it has no live backend. Deploy it on Netlify (with GROQ_API_KEY set) and open the live .netlify.app URL to use Enhance My Idea.');
+      } else {
+        showError('Could not reach the server. Please try again. (' + err.message + ')');
+      }
+    } finally {
+      btn.disabled = false;
+      spinner.style.display = 'none';
+      label.textContent = '✦ Enhance My Idea';
+    }
+  }
+
+  // ── Type Text Effect ──
+  async function typeText(el, text) {
+    el.textContent = '';
+    const chunks = text.split(' ');
+    for (let i = 0; i < chunks.length; i++) {
+      el.textContent += (i === 0 ? '' : ' ') + chunks[i];
+      if (i % 6 === 0) await sleep(18);
+    }
+  }
+
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  // ── Update UI after generation ──
+  function updateUI(input, output) {
+    const section = document.getElementById('outputSection');
+    section.classList.add('visible');
+
+    document.getElementById('toneBadge').textContent =
+      selectedTone.charAt(0).toUpperCase() + selectedTone.slice(1);
+
+    const wBefore = wordCount(input);
+    const wAfter  = wordCount(output);
+    document.getElementById('statWordsBefore').textContent = wBefore;
+    document.getElementById('statWordsAfter').textContent  = wAfter;
+    document.getElementById('statReadability').textContent = readTime(wAfter);
+    document.getElementById('statVersion').textContent = 'v' + versions.length;
+    document.getElementById('statsRow').classList.add('visible');
+
+    updateVersionsBar();
+
+    document.getElementById('footerTime').textContent = new Date().toLocaleTimeString();
+
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // ── Versions Bar ──
+  function updateVersionsBar() {
+    const bar = document.getElementById('versionsBar');
+    if (versions.length <= 1) { bar.classList.remove('visible'); return; }
+    bar.classList.add('visible');
+    bar.innerHTML = versions.map((v, i) =>
+      `<span class="version-chip ${i === currentVersion ? 'active' : ''}"
+        onclick="loadVersion(${i})">v${i+1} · ${v.tone}</span>`
+    ).join('');
+  }
+
+  function loadVersion(i) {
+    currentVersion = i;
+    const v = versions[i];
+    document.getElementById('outputBody').textContent = v.output;
+    document.getElementById('toneBadge').textContent =
+      v.tone.charAt(0).toUpperCase() + v.tone.slice(1);
+    updateVersionsBar();
+    diffVisible = false;
+    document.getElementById('diffSection').classList.remove('visible');
+  }
+
+  // ── Refine Again ──
+  async function refineAgain() {
+    if (!versions.length) return;
+    const last = versions[currentVersion];
+    document.getElementById('inputText').value = last.output;
+    updateCharCount(document.getElementById('inputText'));
+    await enhanceIdea();
+  }
+
+  // ── Diff ──
+  function toggleDiff() {
+    diffVisible = !diffVisible;
+    const diffSection = document.getElementById('diffSection');
+    const diffBody = document.getElementById('diffBody');
+
+    if (diffVisible && versions.length) {
+      const v = versions[currentVersion];
+      diffBody.innerHTML = simpleDiff(v.input, v.output);
+      diffSection.classList.add('visible');
+    } else {
+      diffSection.classList.remove('visible');
+    }
+  }
+
+  function simpleDiff(before, after) {
+    const bWords = before.split(/\s+/);
+    const aWords = after.split(/\s+/);
+    const bSet = new Set(bWords);
+    const aSet = new Set(aWords);
+
+    const removed = bWords.filter(w => !aSet.has(w)).slice(0, 12);
+    const added   = aWords.filter(w => !bSet.has(w)).slice(0, 12);
+
+    if (!removed.length && !added.length)
+      return '<em style="color:#b5b0a8">Minimal wording changes — structure and clarity improved.</em>';
+
+    let html = '';
+    if (removed.length) html += `<p style="margin-bottom:8px"><strong>Removed phrases:</strong> ${removed.map(w => `<del>${w}</del>`).join(' ')}</p>`;
+    if (added.length)   html += `<p><strong>Added phrases:</strong> ${added.map(w => `<ins>${w}</ins>`).join(' ')}</p>`;
+    return html;
+  }
+
+  // ── Copy ──
+  async function copyOutput() {
+    const text = document.getElementById('outputBody').textContent;
+    if (!text) return;
+    await navigator.clipboard.writeText(text);
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = '✓ Copied';
+    btn.classList.add('success');
+    setTimeout(() => { btn.textContent = '📋 Copy'; btn.classList.remove('success'); }, 2000);
+  }
+
+  // ── Download ──
+  function downloadTxt() {
+    const text = document.getElementById('outputBody').textContent;
+    if (!text) return;
+    const blob = new Blob([text], { type: 'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'enhanced-idea.txt';
+    a.click();
+  }
+
+  // ── Clear ──
+  function clearAll() {
+    document.getElementById('inputText').value = '';
+    document.getElementById('charCount').textContent = '0 / 2000';
+    document.getElementById('outputSection').classList.remove('visible');
+    document.getElementById('statsRow').classList.remove('visible');
+    document.getElementById('versionsBar').classList.remove('visible');
+    document.getElementById('diffSection').classList.remove('visible');
+    document.getElementById('errorBanner').classList.remove('visible');
+    document.getElementById('outputBody').textContent = '';
+    versions = [];
+    currentVersion = 0;
+    diffVisible = false;
+  }
+
+  // ── Error ──
+  function showError(msg) {
+    const el = document.getElementById('errorBanner');
+    el.textContent = msg;
+    el.classList.add('visible');
+  }
+
+  // ── Helpers ──
+  function wordCount(text) { return text.trim().split(/\s+/).filter(Boolean).length; }
+  function readTime(words) {
+    const mins = Math.ceil(words / 200);
+    return mins < 1 ? '< 1 min' : mins + ' min';
+  }
+
+  // ── Footer clock ──
+  document.getElementById('footerTime').textContent = new Date().toLocaleTimeString();
+</script>
+</body>
+</html>
